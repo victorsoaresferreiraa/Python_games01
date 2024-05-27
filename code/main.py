@@ -45,8 +45,58 @@ class Player(pygame.sprite.Sprite):
 class Star(pygame.sprite.Sprite):
     def __init__(self, groups, surf):
         super().__init__(groups)
+        self.image = surf
+        self.rect = self.image.get_frect(center = (randint(0, WINDOW_WIDTH), randint(0, WINDOW_HEIGHT)))
+        
+class Laser(pygame.sprite.Sprite):
+    def __init__(self, surf, pos, groups):
+        super().__init__ (groups)
+        self.image = surf
+        self.rect = self.image.get_frect(midbottom = pos)
+        
+    def update(self, dt):
+        self.rect.center -= 400 * dt
+        if self.rect.bottom < 0:
+            self.kill()
             
-
+class Meteor(pygame.sprite.Sprite):
+    def __init__(self, surf, pos, groups):
+        super().__init__(groups)
+        self.original_surf = surf
+        self.image = surf
+        self.rect = self.image.get_frect(center = pos)
+        self.start_time = pygame.time.get_ticks()
+        self.lifetime = 3000
+        self.direction = pygame.Vector2(uniform(0.5, 0.5), 1)
+        self.speed = randint(400, 500)
+        self.rotation_speed = randint(40, 80)
+        self.rotation = 0
+        
+    def update(self, dt):
+        self.rect.center += self.direction * self.speed * dt
+        if pygame.time.get_ticks() - self.start_time >= self.lifetime:
+            self.kill()
+        self.rotation += self.rotation_speed * dt
+        self.image = pygame.transform.rotozoom(self.original_surf, self.rotation, 1)
+        self.rect = self.image.get_frect(center = self.rect.center)
+        
+class AnimatedExplosion(pygame.sprite.Sprite):
+    def __init__(self, frames, pos, groups):
+        super().__ini__(groups)
+        self.frames = frames
+        self.frame_index = 0
+        self.image = self.frames[self.frame_index]
+        self.rect = self.image.get_frect(center = pos)
+        explosion_sound.play()
+        
+    def update(self, dt):
+        self.frames_index += 20 * dt
+        if self.frames_index < len(self.frames):
+            self.image = self.frames[int(self.frame_index)]
+        else:
+            self.kill()
+            
+            
 #Inicia o pygame
 pygame.init()
 #Variaveis que controlam o tamanho da tela
